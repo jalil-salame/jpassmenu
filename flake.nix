@@ -6,7 +6,29 @@
     let
       pkgs = import nixpkgs { inherit system; };
       src = builtins.path { name = "jpassmenu"; path = ./jpassmenu; };
-      jpassmenu = pkgs.writers.writeDashBin "jpassmenu" (builtins.readFile src);
+      jpassmenu-unwrapped = pkgs.writers.writeBashBin "jpassmenu" (builtins.readFile src);
+      wrapperPath = pkgs.lib.makeBinPath [
+        pkgs.fuzzel
+        pkgs.ydotool
+        pkgs.coreutils
+        pkgs.findutils
+        pkgs.getopt
+        pkgs.git
+        pkgs.gnugrep
+        pkgs.gnupg
+        pkgs.gnused
+        pkgs.tree
+        pkgs.which
+        pkgs.openssh
+        pkgs.procps
+        pkgs.qrencode
+      ];
+      jpassmenu = jpassmenu-unwrapped.overrideAttrs (final: prev: {
+        postFixup = ''
+          wrapProgram $out/bin/passmenu \
+            --prefix PATH : "$out/bin:${wrapperPath}"
+        '';
+      });
     in
     {
       packages = {
