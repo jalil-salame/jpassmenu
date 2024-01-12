@@ -29,13 +29,16 @@
             --prefix PATH : "$out/bin:${wrapperPath}"
         '';
       });
+      jpassmenu-overlay = final: prev: { inherit jpassmenu; };
     in
     {
       packages = {
         inherit jpassmenu;
         default = jpassmenu;
       };
-      formatter = pkgs.nixpkgs-fmt;
+      overlays.jpassmenu = jpassmenu-overlay;
+      overlays.default = jpassmenu-overlay;
+        formatter = pkgs.nixpkgs-fmt;
       devShells.default = pkgs.mkShell {
         nativeBuildInputs = [ jpassmenu ];
       };
